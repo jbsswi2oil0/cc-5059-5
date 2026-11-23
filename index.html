@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>主题动机发展器 · Motif Developer</title>
+    <link rel="stylesheet" href="/src/ui/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="logo" aria-hidden="true">♪</span>
+          <div>
+            <h1>主题动机发展器</h1>
+            <p>Motif → development, with replayable lineage</p>
+          </div>
+        </div>
+        <div class="engine" id="engine-badge"></div>
+      </header>
+
+      <main class="layout">
+        <aside class="panel controls" aria-label="生成参数">
+          <section class="control-group">
+            <h2>主题动机</h2>
+            <label class="field">
+              <span>动机名称</span>
+              <input id="motif-name" type="text" value="初稿动机" />
+            </label>
+            <label class="field">
+              <span>音高与时值 <em>(音名:拍数)</em></span>
+              <textarea id="motif-text" rows="3" spellcheck="false">C4:1 D4:0.5 E4:0.5 G4:1 E4:0.5 C4:0.5 D4:1</textarea>
+            </label>
+            <div class="preset-row" id="preset-row"></div>
+            <p class="hint" id="motif-hint"></p>
+          </section>
+
+          <section class="control-group">
+            <h2>调性 / 音域</h2>
+            <div class="two-col">
+              <label class="field">
+                <span>主音</span>
+                <select id="tonic"></select>
+              </label>
+              <label class="field">
+                <span>调式</span>
+                <select id="mode"></select>
+              </label>
+              <label class="field">
+                <span>音域下限</span>
+                <input id="reg-low" type="text" value="C4" />
+              </label>
+              <label class="field">
+                <span>音域上限</span>
+                <input id="reg-high" type="text" value="A5" />
+              </label>
+            </div>
+          </section>
+
+          <section class="control-group">
+            <h2>和声 / 结尾</h2>
+            <label class="field">
+              <span>每小节和弦 <em>(逗号分隔，循环)</em></span>
+              <input id="harmony" type="text" value="C, Am, F, C" />
+            </label>
+            <div class="two-col">
+              <label class="field">
+                <span>结尾音级</span>
+                <select id="ending-pc"></select>
+              </label>
+              <label class="field">
+                <span>结尾锁定</span>
+                <select id="ending-mode">
+                  <option value="pc">音级 + 音域</option>
+                  <option value="exact">精确音高</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>结尾音域下限</span>
+                <input id="ending-low" type="text" value="C4" />
+              </label>
+              <label class="field">
+                <span>结尾音域上限</span>
+                <input id="ending-high" type="text" value="C5" />
+              </label>
+            </div>
+          </section>
+
+          <section class="control-group">
+            <h2>分句规则 / 节奏</h2>
+            <label class="field">
+              <span>乐句模板</span>
+              <select id="template"></select>
+            </label>
+            <label class="field">
+              <span>速度 (BPM)</span>
+              <input id="tempo" type="number" min="40" max="220" value="96" />
+            </label>
+            <div class="checks">
+              <label><input type="checkbox" id="allow-invert" checked /> 倒影</label>
+              <label><input type="checkbox" id="allow-retro" checked /> 逆行</label>
+              <label><input type="checkbox" id="allow-rhythm" checked /> 节奏扩张</label>
+              <label><input type="checkbox" id="allow-transpose" checked /> 移位</label>
+            </div>
+            <label class="field">
+              <span>节奏倍数 <em>(逗号分隔)</em></span>
+              <input id="rhythm-factors" type="text" value="1, 1.25, 1.5, 2, 0.75" />
+            </label>
+            <label class="field">
+              <span>候选数量</span>
+              <input id="candidate-count" type="number" min="1" max="12" value="6" />
+            </label>
+            <label class="field">
+              <span>随机种子</span>
+              <input id="seed" type="text" value="theme-1" />
+            </label>
+          </section>
+
+          <div class="actions">
+            <button id="generate" class="primary">生成乐句</button>
+            <button id="reroll" class="ghost" title="更换种子并重新生成">换一个种子</button>
+          </div>
+        </aside>
+
+        <section class="workbench">
+          <div id="error-banner" class="banner error" hidden></div>
+
+          <section class="panel motif-panel">
+            <div class="panel-head">
+              <h2>主题</h2>
+              <div class="panel-actions">
+                <button id="play-motif" class="ghost small">▶ 试听主题</button>
+              </div>
+            </div>
+            <div id="motif-roll" class="roll"></div>
+            <div id="motif-meta" class="meta-line"></div>
+          </section>
+
+          <section class="panel candidates-panel">
+            <div class="panel-head">
+              <h2>候选乐句</h2>
+              <div class="legend" id="legend"></div>
+            </div>
+            <div id="candidates" class="candidates"></div>
+          </section>
+
+          <section class="panel detail-panel" id="detail-panel" hidden>
+            <div class="panel-head">
+              <h2>结构对照与谱系</h2>
+              <div class="panel-actions">
+                <button id="play-chosen" class="primary small">▶ 播放选中</button>
+                <button id="stop" class="ghost small">■ 停止</button>
+                <label class="inline-check"><input type="checkbox" id="metronome" /> 节拍器</label>
+                <label class="inline-check"><input type="checkbox" id="accompaniment" /> 和声铺底</label>
+                <button id="export-midi" class="ghost small">导出 MIDI</button>
+                <button id="export-json" class="ghost small">导出 JSON</button>
+              </div>
+            </div>
+            <div id="detail-body"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/ui/main.js"></script>
+  </body>
+</html>
