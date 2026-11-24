@@ -10,6 +10,7 @@ import { midiToPitch, pcName, parsePitch, SCALES } from '../music/pitch.js';
 import { PhrasePlayer } from '../audio/player.js';
 import { phraseToMidi, downloadMidi } from '../audio/midi.js';
 import { renderRoll, annotateEvents, slotColorMap, SLOT_COLORS, round } from './roll.js';
+import { SessionWorkbench } from './session.js';
 
 const $ = (id) => document.getElementById(id);
 const player = new PhrasePlayer();
@@ -21,6 +22,8 @@ const state = {
   currentMotifName: '初稿动机',
   motifText: 'C4:1 D4:0.5 E4:0.5 G4:1 E4:0.5 C4:0.5 D4:1',
 };
+
+let workbench = null;
 
 const PRESETS = [
   { name: '上行琶音', text: 'C4:1 E4:1 G4:1 A4:1' },
@@ -165,6 +168,7 @@ function generate() {
   state.currentMotifName = motif.name;
   state.motifText = $('motif-text').value;
   state.colorMap = slotColorMap(result.template?.slots ?? []);
+  workbench?.resetFromMotif();
   renderMotif();
   renderLegend();
   if (!result.ok) {
@@ -614,6 +618,15 @@ function wire() {
     const btn = $('stop');
     if (btn) btn.textContent = s === 'playing' ? '■ 播放中' : '■ 停止';
   };
+
+  workbench = new SessionWorkbench({
+    player,
+    readMotif,
+    readRegister: () => ({ low: parsePitch($('reg-low').value.trim()), high: parsePitch($('reg-high').value.trim()) }),
+    onError: (msg) => showError([msg]),
+  });
+  workbench.boot();
+
   // Publish a tiny handle for automated UI tests.
   window.__motifApp = {
     state,
@@ -622,6 +635,8 @@ function wire() {
     getChosen: () => state.result?.candidates?.[state.chosenIndex] ?? null,
     playCandidate,
     player,
+    workbench,
+    getSession: () => workbench.session,
   };
   generate();
 }

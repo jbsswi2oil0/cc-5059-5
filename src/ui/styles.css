@@ -276,4 +276,46 @@ details.repair .repair-body { margin-top: 8px; display: grid; gap: 6px; }
 
 .play-cursor { stroke: var(--warn); stroke-width: 2; }
 
+.session-panel .session-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px 10px;
+  align-items: end;
+  margin: 10px 0 14px;
+}
+.session-panel .session-controls button { align-self: end; }
+.session-feedback {
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-size: 12px;
+  margin: 10px 0;
+  border: 1px solid;
+  line-height: 1.5;
+}
+.session-feedback.ok { background: #16271e; border-color: #2c5440; color: var(--good); }
+.session-feedback.bad { background: #2a1618; border-color: #6a2a2e; color: #ffb3b5; }
+.session-feedback .rejected { font-family: var(--mono); color: var(--warn); margin-top: 4px; }
+.session-log {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  font-size: 11px;
+}
+.session-log .log-row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 4px 7px;
+  border-radius: 6px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+}
+.session-log .log-row.committed { border-left: 3px solid var(--good); }
+.session-log .log-row.reversed { border-left: 3px solid var(--bad); }
+.session-log .log-row .tag-op { font-family: var(--mono); color: var(--accent); }
+.session-log .log-row .tag-state { margin-left: auto; font-family: var(--mono); color: var(--muted); }
+.session-log .log-row.reversed .tag-state { color: var(--bad); }
+
 svg text { font-family: var(--mono); }
